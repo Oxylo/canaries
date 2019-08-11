@@ -5,7 +5,7 @@ The object of this project is getting a better understanding of price movements 
 
 ## Installation (local)
 
-    $ git clone https://github.com/Oxylo/codex.git your_project_name
+    $ git clone https://github.com/Oxylo/canaries.git your_project_name
 
 Usage
 =====
@@ -20,7 +20,7 @@ Copy data to data/raw and run scripts in appropriate order
 Tests
 =====
 
-If you’re using RStudio, press Cmd/Ctrl + Shift + T (or run devtools::test() if not) to run all the tests in a package
+If you?re using RStudio, press Cmd/Ctrl + Shift + T (or run devtools::test() if not) to run all the tests in a package
 
 
 How it works
