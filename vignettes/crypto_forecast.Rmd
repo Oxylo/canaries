@@ -1,0 +1,8 @@
+<!-- 
+%\VignetteEngine{knitr} 
+%\VignetteIndexEntry{Canaries Crypto Analysis} 
+--> 
+
+# Crypto Analysis
+
+The objective of this project is finding out how we can make some money by predicting crypto market prices.

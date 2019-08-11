@@ -1,0 +1,14 @@
+Package: canaries
+Type: Package
+Title: Intents to make some money by predicting crypto prices
+Version: 0.1.0
+Author: "Pieter Marres <pmarres@oxylo.com> [aut, cre]"
+Maintainer: Pieter Marres <pmarres@oxylo.com>
+Description: Use autoregressive neural net to predict crypto prices
+License: CC0
+Encoding: UTF-8
+LazyData: true
+VignetteBuilder: knitr
+RoxygenNote: 6.1.1
+Suggests: 
+    testthat (>= 2.1.0)
