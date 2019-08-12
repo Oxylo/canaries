@@ -28,4 +28,3 @@ csv2rds <- function(fcsv){
   return(NULL)
 }
 
-csv2rds("binance_hourly_history.csv")
