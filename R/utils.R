@@ -6,9 +6,6 @@
 #'
 #' @return NULL
 #' @export
-#'
-#' @example
-#' csv2rds(data/dataset.csv)
 csv2rds <- function(fcsv){
   if(!grepl("csv", fcsv)){
     print('infile name should have extention csv')

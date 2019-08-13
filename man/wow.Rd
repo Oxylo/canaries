@@ -12,3 +12,6 @@ string
 \description{
 Prints Wow! Pretty cool uh?!
 }
+\examples{
+print('wow!')
+}
