@@ -6,6 +6,6 @@ data <- readRDS("data/binance_hourly_history.rds")
 
 
 # select market btc/usd
-selection <- (data$base == "BTC") & (data$quote == "USDT")
-btc <- data[selection,]
-plot(btc$close, type="l", col="green")
+# selection <- (data$base == "BTC") & (data$quote == "USDT")
+# btc <- data[selection,]
+# plot(btc$close, type="l", col="green")
