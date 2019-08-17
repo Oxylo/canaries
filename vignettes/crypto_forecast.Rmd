@@ -1,7 +1,10 @@
-<!-- 
-%\VignetteEngine{knitr} 
-%\VignetteIndexEntry{Canaries Crypto Analysis} 
---> 
+title: "Canaries"
+author: "Pieter Marres"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{"Canaries"}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
 
 # Crypto Analysis
 
