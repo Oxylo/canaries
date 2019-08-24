@@ -26,46 +26,58 @@ csv2rds <- function(fcsv){
 }
 
 
-#' vlookup
+
+#' Pctchange
 #'
-#' Lookup function similar to Excel but with two extra features: lookup column
-#' can be any column (not just the 1st column) and includes interpolation
-#' lookup
+#' Calculates the percentage change between the current and a prior element.
 #'
+#' @param x A vector or time series containing at least 2 elements
 #'
-#' @param lookup_value a length-one vector, value you want to lookup
-#' @param table dataframe specifying the lookup table
-#' @param lookup_colname a string, column name containing lookup_value
-#' @param return_colname a string, column name containing return value
-#' @param range_lookup a string indicating lookup method,
-#' either "floor", "interpolate" or "ceiling"
-#' @return a length-one vector, specifying the value found in column labeled
-#' with given lookup_colname
+#' @return vector or time series
 #' @export
 #'
 #' @examples
-#'
-#'
-vlookup <- function(){
-
+#' v <- c(8, 4, 0, 1, 3)
+#' ts <- ts(v)
+#' pctchange()  # c(NA, -50, -100, NA, 200)
+pctchange <- function(x){
+  lagged <- c(NA, x[-length(x)])
+  change <- 100 * (x/lagged - 1)
+  cleaned <- ifelse(is.finite(change), change, NA)
 }
 
-#' Copymay
+#' Remove noise
 #'
-#' Checks mayority of ones in first d vector elements
+#' Sets value equal to zero if between given threshold bounderies
 #'
-#' @param x vector containing zeros and ones only
-#' @param d integer indicating how many elements should be taken into account
-#'
-#' @return Boolean. TRUE if most d elements are 1, else FALSE
+#' @param x vector
+#' @param threshold vector length 1 or 2
+#' @param logical Default FALSE. If TRUE, negative and positive values are converted to
+#' +1 and -1 respectively
+#' @return vector
 #' @export
 #'
 #' @examples
-#' copymay(c(1, 0, 1), 2)  # FALSE
-#' copymay(c(1, 0, 1), 3)  # TRUE
-#' copymay(c(1, 0, 1, 0), 4)  # FALSE
-copymay <- function(x, d){
-  items <- x[1:d]
-  return(mean(items) > 0.5)
+#' rmnoise(-3:3, threshold=2)                   # =c(-3, -2,  0, 0, 0, 2, 3)
+#' rmnoise(-3,3, threshold=c(-1, 2))            # =c(-3, -2, -1, 0, 0, 2, 3)
+#' rmnoise(-3:3, threshold=c(-1, 2), sign=TRUE) # =c(-1, -1, -1, 0, 0, 1, 1)
+rmnoise <- function(x, threshold, sign=FALSE){
+  n <- length(threshold)
+  if(!(n %in% c(1,2)))
+    stop("threshold parameters must be a vector length 1 or 2")
+
+  if(n==1) {
+    low <- -1 * abs(threshold)
+    upp <- abs(threshold)
+  }
+  else {
+    low <- threshold[1]
+    upp <- threshold[2]
+  }
+
+  is.noise <- (x > low) & (x < upp)
+  denoised <- ifelse(is.noise, 0, x)
+  if(sign) denoised <- sign(denoised)
+  return(denoised)
 }
 
