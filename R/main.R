@@ -1,67 +1,52 @@
 source("R/utils.R")
 
+# settings
+outfile     <- "~/Desktop/wfscenarios.txt"
+thresholds  <- c(0, 0.25, 0.50, 1, 2)
+rollwindows <- c(3, 4, 8, 24, 48, 200)
+signed      <- c(FALSE, TRUE)
+grplen      <- 1000 # we split btc time series is 15 time series 1000 each (+ remainder grp)
+
+
 # load data
 # csv2rds("binance_hourly_history.csv")
-infile <- file.path("data", "binance_hourly_history.rds")
-data <- readRDS(infile)
-
+data <- readRDS("data/binance_hourly_history.rds")
 
 # select market btc/usd
-# selection <- (data$base == "BTC") & (data$quote == "USDT")
-# btc <- data[selection,]
-# plot(btc$close, type="l", col="green")
+selection <- (data$base == "BTC") & (data$quote == "USDT")
+btc <- data[selection, "close"]
+totlen <- length(btc)
+print(paste("Total length of BTC time series:", totlen, "hours"))
+splitgrps   <- splitto(totlen, grplen)
 
-#' # ########### TEMP CODE ##################
-#'
-#' library(forecast)
-#' data <- read.csv("data/eneco.data")
-#' myts <- ts(data$gas, start=c(2007, 11), end=c(2019, 6), frequency=12)
-#' autoplot(myts, main='gas consumption', xlab="year", ylab="m3")
-#'
-#' fcf <- function(y, h)
-#'   #' User defined forecast function
-#'   #'
-#'   #' @param y : time series
-#'   #' @param h : prediction horizon
-#' {
-#'   fit <- nnetar(y, repeats=20, p=1, P=1, size=2, lambda=0)
-#'   fc <- forecast(fit, h)
-#' }
-#'
-#' err <- tsCV(myts, fcf, h=1)
-#' fitted <- myts - lag(err, -1)
-#' y.fitted <- cbind(myts, fitted)
-#' par(mfcol=c(2,1))
-#'
-#' plot1 <- (autoplot(y.fitted, xlab='year', ylab='y and predicted')
-#'           + theme(legend.position = 'bottemright')
-#'           + scale_x_continuous(breaks = seq(2008, 2020, 2))
-#'           + scale_color_manual(values=c('black', 'orange'))
-#' )
-#' plot2 <- autoplot(lag(err, -1), xlab='year', ylab='y minus predicted', color='red')
-#' grid.arrange(plot1, plot2, nrow=2)
-#'
-#' wf <- function(y)
-#'   #' Generate 1 period ahead predictions
-#'   #'
-#'   #' @param y : time series
-#' {
-#'   err <- tsCV(myts, fcf, h=1)
-#'   wf.predict <- myts - lag(err, -1)
-#' }
+testgrid <- expand.grid(thresholds,
+                        rollwindows,
+                        signed)
+names(testgrid) <- c("threshold", "lookback", "signed")
 
 
+if (file.exists(outfile))
+  file.remove(outfile)
 
-##########################################
+header <- paste("threshold", "lookback", "signed", "start", "end", "corr", "corr.t", sep=",")
+write(header, outfile)
 
-
-pctchange <- function(ts) {
-  lagged <- lag(ts, -1)
-  pctch <- 100 * (ts/lagged - 1)
-  pctch <- ts(c(NA, pctch))
-  return(pctch)}
-
+# we look at pct changes per hour
+dbtc <- pctchange(btc)
 
 
-
-
+for(i in 1:nrow(testgrid)){
+  for(grp in splitgrps){
+    row <- testgrid[i,]
+    line <- paste(row$threshold, row$lookback, row$signed, grp[1], grp[length(grp)], sep=",")
+    print(paste("Processing: ", line, sep=""))
+    subseries <- dbtc[grp]
+    y <- rmnoise(subseries, threshold = row$threshold, sign = row$signed)
+    pred <- wf(y, window=row$lookback, fcf=fc_ann)
+    corr <- cor(y, pred, use = "complete.obs")
+    pred.t <- rmnoise(pred, threshold = row$threshold, sign = row$signed)
+    corr.t <- cor(y, pred.t, use = "complete.obs")
+    print(c(round(corr,2), round(corr.t,2)))
+    write(paste(line, round(corr,2), round(corr.t,2), sep=","), outfile, append = TRUE)
+  }
+}

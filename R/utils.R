@@ -1,3 +1,5 @@
+library(forecast)
+
 #' csv2rds
 #'
 #' Converts CSV file to RDS format
@@ -59,7 +61,7 @@ pctchange <- function(x){
 #'
 #' @examples
 #' rmnoise(-3:3, threshold=2)                   # =c(-3, -2,  0, 0, 0, 2, 3)
-#' rmnoise(-3,3, threshold=c(-1, 2))            # =c(-3, -2, -1, 0, 0, 2, 3)
+#' rmnoise(-3:3, threshold=c(-1, 2))            # =c(-3, -2, -1, 0, 0, 2, 3)
 #' rmnoise(-3:3, threshold=c(-1, 2), sign=TRUE) # =c(-1, -1, -1, 0, 0, 1, 1)
 rmnoise <- function(x, threshold, sign=FALSE){
   n <- length(threshold)
@@ -80,4 +82,74 @@ rmnoise <- function(x, threshold, sign=FALSE){
   if(sign) denoised <- sign(denoised)
   return(denoised)
 }
+
+#' Forecast autoregressive neural net
+#'
+#' User defined forecast function
+#'
+#' @param x Time series
+#' @param h Scalar indicating prediction horizon
+#'
+#' @return Double
+#' @export
+#'
+#' @examples
+fc_ann <- function(x, h){
+  # Let algo determine params like so: p=1, P=1, size=2
+  fit <- nnetar(x, repeats=20, lambda=NULL)
+  fc <- forecast(fit, h)
+  return(fc)
+}
+
+#' Walk foreward analysis
+#'
+#' Return 1 period ahead predictions using rolling training window
+#'
+#' @param x vector or time series
+#' @param window integer specifying rolling window
+#' @param fcf forecast funcion
+#'
+#' @return vector or time series
+#' @export
+#'
+#' @examples
+wf <- function(x, window, fcf){
+  err <- tsCV(x, fcf, window=window, h=1)
+  predictions <- x - lag(err, -1)
+  return(predictions)
+}
+
+
+#' Split to equal length groups
+#'
+#' Return start & end index of each group
+#'
+#' Note: splitto() is similar to split() but splitto() does works fine
+#' (no warnings) when grplen is not a multiple of totlen
+#'
+#' @param totlen Integer specifying total length
+#' @param grplen Integer specifying length of each group
+#'
+#' @return list of vectors
+#' @export
+#'
+#' @examples
+#' splitto(10, 3)    # list("1"=1:3, "2"=4:6, "3"=7:9, "4"=10)
+#' splitto(100, 24)  # list("1"=1:24, "2"=25:48, "3"=49:72, "4"=73:96, "5"=97:100)
+#' splitto(10, 20)   # list("1"=1:10)
+
+splitto <- function(totlen, grplen){
+  nfullgrps <- totlen %/% grplen
+  remainder <- totlen %% grplen
+  if(nfullgrps == 0)
+    fac <- rep(1, each=remainder)
+  else
+    fac <- c(rep(1:nfullgrps, each=grplen), rep(nfullgrps+1, each=remainder))
+  return(split(1:totlen, fac))
+}
+
+
+
+
+
 

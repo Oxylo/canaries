@@ -22,6 +22,6 @@ Sets value equal to zero if between given threshold bounderies
 }
 \examples{
 rmnoise(-3:3, threshold=2)                   # =c(-3, -2,  0, 0, 0, 2, 3)
-rmnoise(-3,3, threshold=c(-1, 2))            # =c(-3, -2, -1, 0, 0, 2, 3)
+rmnoise(-3:3, threshold=c(-1, 2))            # =c(-3, -2, -1, 0, 0, 2, 3)
 rmnoise(-3:3, threshold=c(-1, 2), sign=TRUE) # =c(-1, -1, -1, 0, 0, 1, 1)
 }
